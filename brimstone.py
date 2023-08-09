@@ -4,19 +4,6 @@ from getpass import getpass
 import random
 import time
 
-with open("banner.txt","r",encoding="utf8") as f:
-    print(f.read())
-
-user = input("Your main nation: ")
-session = NSSession("Brimstone","0.1","Volstrostia",user)
-
-
-region = canonicalize(input("Region: ")) # TODO: Track from nation
-nation = canonicalize(input("RO Nation: "))
-password = getpass("Password: ")
-
-WA_only = False
-
 def fetch_nations(session, region, WA_only=False):
     # For non-WA nations
     if not WA_only:
@@ -67,6 +54,19 @@ def track_inbounds(session, region, inbound, WA_only=False):
         print("Shutting down radar at user request")
 
 def main(): 
+    with open("banner.txt","r",encoding="utf8") as f:
+        print(f.read())
+
+    user = input("Your main nation: ")
+    session = NSSession("Brimstone","0.1","Volstrostia",user)
+
+
+    region = canonicalize(input("Region: ")) # TODO: Track from nation
+    nation = canonicalize(input("RO Nation: "))
+    password = getpass("Password: ")
+
+    WA_only = False
+
     print("Launcher initialized. Press SPACE to start tracking.")
     if session.login(nation, password):
         print("Login successful!")
