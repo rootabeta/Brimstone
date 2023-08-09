@@ -91,7 +91,7 @@ if session.login(nation, password):
                             print("\r[!] Failed to remove nation from tracking")
 
                 else:
-                    print("[!] LAUNCH FAILED")
+                    print("\r[!] LAUNCH FAILED")
     except KeyboardInterrupt:
         print("Disarming SAM missiles at user request")
 
