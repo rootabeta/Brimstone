@@ -66,34 +66,35 @@ def track_inbounds(session, region, inbound, WA_only=False):
     except KeyboardInterrupt:
         print("Shutting down radar at user request")
 
-print("Launcher initialized. Press SPACE to start tracking.")
-if session.login(nation, password):
-    print("Login successful!")
-    manager = Manager()
-    inbound = manager.list()
+if __name__ == "__main__":
+    print("Launcher initialized. Press SPACE to start tracking.")
+    if session.login(nation, password):
+        print("Login successful!")
+        manager = Manager()
+        inbound = manager.list()
 
-    radar = Process(target=track_inbounds, args=(session, region, inbound))
-    radar.start()
+        radar = Process(target=track_inbounds, args=(session, region, inbound))
+        radar.start()
 
-    print("SAM missiles online. Ready to blast em to smithereens.")
-    try: 
-        while True:
-            if inbound:
-                target = random.choice(inbound)
-                print(f"\r[+] ACQUIRED MISSILE LOCK ON -[ {target.upper()} ]-")
-                if session.banject(target):
-                    print(f"\r[+] IMPACT CONFIRMED: {target.upper()}")
-                    if target in inbound:
-                        try:
-                            inbound.remove(target)
-                        except:
-                            print("\r[!] Failed to remove nation from tracking")
+        print("SAM missiles online. Ready to blast em to smithereens.")
+        try: 
+            while True:
+                if inbound:
+                    target = random.choice(inbound)
+                    print(f"\r[+] ACQUIRED MISSILE LOCK ON -[ {target.upper()} ]-")
+                    if session.banject(target):
+                        print(f"\r[+] IMPACT CONFIRMED: {target.upper()}")
+                        if target in inbound:
+                            try:
+                                inbound.remove(target)
+                            except:
+                                print("\r[!] Failed to remove nation from tracking")
 
-                else:
-                    print("\r[!] LAUNCH FAILED")
-    except KeyboardInterrupt:
-        print("Disarming SAM missiles at user request")
+                    else:
+                        print("\r[!] LAUNCH FAILED")
+        except KeyboardInterrupt:
+            print("Disarming SAM missiles at user request")
 
-    print("Goodbye")
-else:
-    print("Fatal error - check your credentials, ya dingus")
+        print("Goodbye")
+    else:
+        print("Fatal error - check your credentials, ya dingus")
