@@ -4,7 +4,7 @@ from getpass import getpass
 import random
 import time
 
-with open("banner.txt","r") as f:
+with open("banner.txt","r",encoding="utf8") as f:
     print(f.read())
 
 user = input("Your main nation: ")
@@ -16,7 +16,6 @@ nation = canonicalize(input("RO Nation: "))
 password = getpass("Password: ")
 
 WA_only = False
-
 
 def fetch_nations(session, region, WA_only=False):
     # For non-WA nations
@@ -96,3 +95,5 @@ if session.login(nation, password):
         print("Disarming SAM missiles at user request")
 
     print("Goodbye")
+else:
+    print("Fatal error - check your credentials, ya dingus")
