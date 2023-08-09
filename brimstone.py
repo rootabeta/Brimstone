@@ -79,7 +79,7 @@ if session.login(nation, password):
             if inbound:
                 target = random.choice(inbound)
                 print(f"[+] ACQUIRED MISSILE LOCK ON -[ {target.upper()} ]-")
-                if session.eject(target):
+                if session.banject(target):
                     print(f"[+] IMPACT CONFIRMED: {target.upper()}")
                     inbound.remove(target)
                 else:
