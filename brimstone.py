@@ -25,7 +25,7 @@ def fetch_nations(session, region, WA_only=False):
         if ":" in nations["nations"]:
             nationlist = nations["nations"].split(":")
         else:
-            nationlist = nations["nations"]
+            nationlist = [nations["nations"]]
 
     # WA-only mode
     else:
@@ -33,7 +33,7 @@ def fetch_nations(session, region, WA_only=False):
         if "," in nations["unnations"]:
             nationlist = nations["unnations"].split(",")
         else:
-            nationlist = nations["unnations"]
+            nationlist = [nations["unnations"]]
 
     return nationlist
 
@@ -64,7 +64,7 @@ def track_inbounds(session, region, inbound, WA_only=False):
     except KeyboardInterrupt:
         print("Shutting down radar at user request")
 
-print("Press space to log in")
+print("Launcher initialized. Press SPACE to start tracking.")
 if session.login(nation, password):
     print("Login successful!")
     manager = Manager()
