@@ -50,12 +50,15 @@ def track_inbounds(session, region, inbound, WA_only=False):
 
             # Remove nations that have left from our hitlist
             for nation in inbound:
-                if canonicalize(nation) not in newNations:
-                    inbound.remove(canonicalize(nation))
+                if canonicalize(nation) not in newNations and canonicalize(nation) in inbound:
+                    try:
+                        inbound.remove(canonicalize(nation))
+                    except:
+                        print("\r[!] Failed to remove nation from tracking")
 
             for nation in newNations:
                 if canonicalize(nation) not in oldNations and canonicalize(nation) not in inbound:
-                    print(f"[!] Radar detected inbound nation!: {canonicalize(nation)}")
+                    print(f"\r[!] Radar detected inbound nation!: {canonicalize(nation)}")
                     inbound.append(canonicalize(nation))
             
             # Now, set the state to the new one, to detect next second
@@ -78,10 +81,15 @@ if session.login(nation, password):
         while True:
             if inbound:
                 target = random.choice(inbound)
-                print(f"[+] ACQUIRED MISSILE LOCK ON -[ {target.upper()} ]-")
+                print(f"\r[+] ACQUIRED MISSILE LOCK ON -[ {target.upper()} ]-")
                 if session.banject(target):
-                    print(f"[+] IMPACT CONFIRMED: {target.upper()}")
-                    inbound.remove(target)
+                    print(f"\r[+] IMPACT CONFIRMED: {target.upper()}")
+                    if target in inbound:
+                        try:
+                            inbound.remove(target)
+                        except:
+                            print("\r[!] Failed to remove nation from tracking")
+
                 else:
                     print("[!] LAUNCH FAILED")
     except KeyboardInterrupt:
