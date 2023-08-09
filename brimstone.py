@@ -66,7 +66,7 @@ def track_inbounds(session, region, inbound, WA_only=False):
     except KeyboardInterrupt:
         print("Shutting down radar at user request")
 
-if __name__ == "__main__":
+def main(): 
     print("Launcher initialized. Press SPACE to start tracking.")
     if session.login(nation, password):
         print("Login successful!")
@@ -98,3 +98,6 @@ if __name__ == "__main__":
         print("Goodbye")
     else:
         print("Fatal error - check your credentials, ya dingus")
+
+if __name__ == "__main__":
+    main()
