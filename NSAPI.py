@@ -35,14 +35,21 @@ def getRegionShard(region, shard, user):
     URL = f"https://nationstates.net/cgi-bin/api.cgi?region={region}&q={shard}"
     return regionAPI(URL, userAgent)
 
+def getRegion(nation, user):
+    userAgent = f"Brimstone/0.1 (API component); Developed by nation=Volstrostia; in use by nation={user}"
+    URL = f"https://nationstates.net/cgi-bin/api.cgi?nation={nation}&q=region"
+    region = regionAPI(URL, userAgent)
+
 def getNations(region, user):
     nations = getRegionShard(region, "nations", user)
     if nations and "nations" in nations:
         nationList = nations["nations"]
-        if ":" in nationList:
+        if nationList and ":" in nationList:
             return nationList.split(":")
-        else:
+        elif nationList:
             return [nationList]
+        else:
+            return []
     else:
         return []
 
@@ -50,10 +57,12 @@ def getWANations(region, user):
     nations = getRegionShard(region, "wanations", user)
     if nations and "unnations" in nations:
         nationList = nations["unnations"]
-        if "," in nationList:
+        if nationList and "," in nationList:
             return nationList.split(",")
-        else:
+        elif nationList:
             return [nationList]
+        else:
+            return []
     else:
         return []
 

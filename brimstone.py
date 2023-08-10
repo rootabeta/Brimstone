@@ -5,7 +5,7 @@ import random
 import time
 import NSAPI
 
-def fetch_nations(user, region, WA_only=False):
+def fetch_nations(user, region, WA_only):
     # For non-WA nations
     if not WA_only:
         nationlist = NSAPI.getNations(canonicalize(region), canonicalize(user))
@@ -17,7 +17,7 @@ def fetch_nations(user, region, WA_only=False):
     time.sleep(0.700) 
     return nationlist
 
-def track_inbounds(user, region, inbound, WA_only=False):
+def track_inbounds(user, region, inbound, WA_only):
     print("Radar online. Keeping our eye on the sky.")
     oldNations = []
     newNations = []
@@ -55,10 +55,13 @@ def main():
     session = NSSession("Brimstone","0.1","Volstrostia",user)
 
     region = canonicalize(input("Region: ")) # TODO: Track from nation
+
     nation = canonicalize(input("RO Nation: "))
     password = getpass("Password: ")
 
     WA_only = False
+    WA_only = True if str(input("Only track WA? (y/N) ")).lower().startswith("y") else False
+    print("Tracking WA movement" if WA_only else "Tracking movement")
 
     print("Launcher initialized. Press SPACE to start tracking.")
     if session.login(nation, password):
@@ -66,7 +69,7 @@ def main():
         manager = Manager()
         inbound = manager.list()
 
-        radar = Process(target=track_inbounds, args=(user, region, inbound))
+        radar = Process(target=track_inbounds, args=(user, region, inbound, WA_only))
         radar.start()
 
         print("SAM missiles online. Ready to blast em to smithereens.")
