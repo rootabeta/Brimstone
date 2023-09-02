@@ -89,7 +89,7 @@ def main():
         for RO in NSAPI.getROs(region, user):
             print(f"Identified RO: {RO}")
             ROs.append(canonicalize(RO)) # Just in case
-            time.sleep(0.7) # CLear ratelimit
+        time.sleep(0.7) # Clear ratelimit
 
     print("SAM site initialized. Press SPACE to arm missiles.")
     if session.login(nation, password):
