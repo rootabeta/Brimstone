@@ -20,12 +20,12 @@ def regionAPI(url, user_agent):
     # If we have <10 requests left in this window, sloooow down
     if requests_left < 10:
         seconds_until_reset = int(head["RateLimit-Reset"])
-        delay = seconds_until_reset / requests_left
+        delay = float(seconds_until_reset) / float(requests_left)
 
         # A 700ms delay is invoked by the parent function
         # If that is enough, don't sleep more. Otherwise, sleep that long
-        if delay > 700:
-            time.sleep(699 - delay)
+        if delay > 0.700:
+            time.sleep(0.699 - delay)
 
     parsed_response = benedict.from_xml(r.text, keyattr_dynamic=True)
     parsed_response.standardize()
@@ -49,12 +49,12 @@ def nationAPI(url, user_agent):
     # If we have <10 requests left in this window, sloooow down
     if requests_left < 10:
         seconds_until_reset = int(head["RateLimit-Reset"])
-        delay = seconds_until_reset / requests_left
+        delay = float(seconds_until_reset) / float(requests_left)
 
         # A 700ms delay is invoked by the parent function
         # If that is enough, don't sleep more. Otherwise, sleep that long
-        if delay > 700:
-            time.sleep(699 - delay)
+        if delay > 0.700:
+            time.sleep(0.699 - delay)
 
     parsed_response = benedict.from_xml(r.text, keyattr_dynamic=True)
     parsed_response.standardize()
