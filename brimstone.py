@@ -62,7 +62,7 @@ def main():
     with open("banner.txt","r",encoding="utf8") as f:
         print(f.read())
 
-    user = input("Your main nation: ")
+    user = canonicalize(input("Your main nation: "))
 
     print("Initializing SAM site, please wait...")
     session = NSSession("Brimstone","0.4","Volstrostia",user)
