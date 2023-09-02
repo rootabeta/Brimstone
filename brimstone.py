@@ -72,6 +72,7 @@ def main():
     nation = canonicalize(input("RO Nation: "))
     password = getpass("Password: ")
     region = canonicalize(NSAPI.getRegion(nation,user))
+    time.sleep(0.7) # CLear ratelimit
     print(f"Preparing to eliminate incursions into the airspace of: {region.upper()}")
 
     WA_only = False
@@ -88,6 +89,7 @@ def main():
         for RO in NSAPI.getROs(region, user):
             print(f"Identified RO: {RO}")
             ROs.append(canonicalize(RO)) # Just in case
+            time.sleep(0.7) # CLear ratelimit
 
     print("SAM site initialized. Press SPACE to arm missiles.")
     if session.login(nation, password):
