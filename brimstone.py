@@ -13,9 +13,11 @@ version = "2.0"
 nsdotpylogger = logging.getLogger("NSDotPy")
 nsdotpylogger.setLevel(logging.WARNING)
 printer = PrettyPrinter()
+running = True
 
 def track_inbounds(radar, inbound):
-    while True:
+    global running
+    while running:
         bogeys = radar.ping()
         inbound = bogeys
         radar.sleep() # Delay AFTER the ping, so the detections are delivered as fast as possible
@@ -158,6 +160,8 @@ def main():
 
         except KeyboardInterrupt:
             printer.info("Disarming SAM missiles at user request")
+            global running
+            running = False
 
     else:
         printer.error("Check your credentials, ya dingus")
