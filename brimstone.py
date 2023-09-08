@@ -113,8 +113,8 @@ def main():
 
     print(f"Preparing to eliminate incursions into the airspace of: {target_region.upper()}")
     radar = NSAPI.Radar(user, target_region, inbound, WA_only, whitelist, blacklist, ban_bogeys, delay, jitter, version)
+    exit("Terminating") if input("Activate SAM site? (Y/n) ").lower().startswith("n") else print("SAM site initialized. Press SPACE to arm missiles.")
 
-    print("SAM site initialized. Press SPACE to arm missiles.")
     if session.login(ro_nation, password):
         print("\rMissiles armed. Starting radar.")
 
