@@ -1,0 +1,54 @@
+[config]
+# Only target WA nations
+wa_only = false
+
+# Do not target ROs
+ignore_ros = true 
+
+# Do not target residents
+ignore_residents = false
+
+# Assume unidentified, non-whitelist/blacklist nations are hostile
+# Set to false to only ban nations on the blacklist
+target_bogeys = false
+
+# Shut down Brimstone when the region updates
+stoponupdate = false 
+
+# How frequently to poll the API in ms
+pollspeed = 650
+
+# How many seconds to add to the API delay (useful for multiple ROs)
+jitter = 0 
+
+# Nations take priority over regions
+# Whitelist and blacklist initialized at startup and are not refreshed due to API limit
+
+# Do not ban these nations, or nations in these regions, if they appear
+# If in whitelist nations, spare
+# If in blacklist nations, ban
+# If in blacklist regions, ban
+# If in whitelist regions, spare
+# If none of the above, follow conditions of target_bogeys
+
+# DO NOT BAN THESE:
+[whitelist]
+nations = [
+]
+
+regions = [
+	"suspicious"
+]
+
+# Ban these nations, or nations in these regions, if they appear
+# If target_bogeys = False, ONLY ban these
+# Otherwise, this has little effect
+[blacklist]
+
+nations = [
+
+]
+
+regions = [
+	"artificial_solar_system"
+]
