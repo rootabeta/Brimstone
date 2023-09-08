@@ -10,7 +10,7 @@ ignore_residents = false
 
 # Assume unidentified, non-whitelist/blacklist nations are hostile
 # Set to false to only ban nations on the blacklist
-target_bogeys = false
+target_bogeys = true
 
 # Shut down Brimstone when the region updates
 stoponupdate = false 
@@ -50,5 +50,5 @@ nations = [
 ]
 
 regions = [
-	"artificial_solar_system"
+	"artificial_solar_system",
 ]

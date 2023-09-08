@@ -1,3 +1,4 @@
 nsdotpy
 pwinput
 rtoml
+colorama

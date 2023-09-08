@@ -1,12 +1,18 @@
+from prettyprinter import PrettyPrinter
 from nsdotpy.session import NSSession, canonicalize
 from threading import Thread
-import rtoml
 from pwinput import pwinput
+import logging
+import rtoml
 import random
 import time
 import NSAPI
 
 version = "2.0"
+
+nsdotpylogger = logging.getLogger("NSDotPy")
+nsdotpylogger.setLevel(logging.WARNING)
+printer = PrettyPrinter()
 
 def track_inbounds(radar, inbound):
     while True:
@@ -39,28 +45,28 @@ def main():
     ignore_residents = config["config"].get("ignore_residents")
     delay = config["config"].get("pollspeed") or "700" ; delay = int(delay)
     if delay < 600: 
-        print("Rate limit too low; overriding to 600ms")
+        printer.warning("Rate limit too low; overriding to 600ms")
         delay = 600
 
     jitter = config["config"].get("jitter") or "0" ; jitter = int(jitter)
 
-    user = canonicalize(input("Your main nation: "))
-    ro_nation = canonicalize(input("RO Nation: "))
-    password = pwinput(mask="*")
+    user = canonicalize(printer.ask("Your main nation: "))
+    ro_nation = canonicalize(printer.ask("RO Nation: "))
+    password = printer.password()
 
     print()
-    print("SETTINGS:")
-    print(f"Main Nation:        {user}")
-    print(f"RO Nation:          {ro_nation}")
+    printer.info("SETTINGS:")
+    printer.indent(f"Main Nation:        {user}")
+    printer.indent(f"RO Nation:          {ro_nation}")
     print()
-    print(f"Only target WA:     {WA_only}")
-    print(f"Ignore ROs:         {spare_ROs}")
-    print(f"Ignore residents:   {ignore_residents}")
-    print(f"Ban unknowns:       {ban_bogeys}")
-    print(f"Killswitch:         {upd_killswitch}")
+    printer.indent(f"Only target WA:     {WA_only}")
+    printer.indent(f"Ignore ROs:         {spare_ROs}")
+    printer.indent(f"Ignore residents:   {ignore_residents}")
+    printer.indent(f"Ban unknowns:       {ban_bogeys}")
+    printer.indent(f"Killswitch:         {upd_killswitch}")
     print()
-    print(f"Delay interval:     {delay}ms")
-    print(f"Jitter:             {str(jitter).zfill(len(str(delay)))}ms")
+    printer.indent(f"Delay interval:     {delay}ms")
+    printer.indent(f"Jitter:             {str(jitter).zfill(len(str(delay)))}ms")
     print()
 
     delay = float(delay) / 1000.0
@@ -68,15 +74,18 @@ def main():
 
     inbound = []
 
-    target_region = canonicalize(NSAPI.getRegion(ro_nation,user, version))
+    # Create an API session for polling setup data ONLY
+    # Another instance in another thread will handle the radar work after this is disused
+    api = NSAPI.API(user, version, delay, jitter) 
+    target_region = canonicalize(api.getRegion(ro_nation))
 
-    print("Initializing SAM site, please wait...")
-    session = NSSession("Brimstone",version,"Volstrostia",user)
+    printer.info("Initializing SAM site, please wait...")
+    session = NSSession("Brimstone",version,"Volstrostia",user,link_to_src="https://github.com/rootabeta/brimstone",logger=nsdotpylogger)
 
-    print("Initializing IFF system, please wait...")
+    printer.info("Initializing IFF system, please wait...")
     if spare_ROs: 
-        print("Adding ROs to whitelist")
-        for RO in NSAPI.getROs(target_region, user, version):
+        printer.info("Adding ROs to whitelist")
+        for RO in api.getROs(target_region):
             whitelist["explicit"].add(canonicalize(RO)) # Hard-whitelist ROs. They will not be banned. 
         time.sleep(delay) # Clear ratelimit
 
@@ -84,15 +93,15 @@ def main():
         whitelist["explicit"].add(canonicalize(nation)) # Add any specific whitelists from the config
 
     if ignore_residents and target_region not in config["whitelist"].get("regions"): 
-        print(f"Adding all nations in {target_region} to whitelist")
-        for nation in NSAPI.getNations(canonicalize(target_region), user, version):
+        printer.info(f"Adding all nations in {target_region} to whitelist")
+        for nation in api.getNations(canonicalize(target_region)):
             whitelist["implicit"].add(canonicalize(nation))
         time.sleep(delay)
 
 
     for region in config["whitelist"].get("regions"):
-        print(f"Adding all nations in {region} to whitelist")
-        for nation in NSAPI.getNations(canonicalize(region), user, version):
+        printer.info(f"Adding all nations in {region} to whitelist")
+        for nation in api.getNations(canonicalize(region)):
             whitelist["implicit"].add(canonicalize(nation))
         time.sleep(delay)
 
@@ -100,23 +109,25 @@ def main():
         blacklist["explicit"].add(canonicalize(nation))
 
     for region in config["blacklist"].get("regions"):
-        print(f"Adding all nations in {region} to blacklist")
-        for nation in NSAPI.getNations(canonicalize(region), user, version):
+        printer.info(f"Adding all nations in {region} to blacklist")
+        for nation in api.getNations(canonicalize(region)):
             blacklist["implicit"].add(canonicalize(nation))
         time.sleep(delay)
 
-    print("IFF System Initialized")
-    print(f"Explicitly permitted:  {len(whitelist['explicit'])}")
-    print(f"Implicitly permitted:  {len(whitelist['implicit'])}")
-    print(f"Explicitly targetted:  {len(blacklist['explicit'])}")
-    print(f"Implicitly targetted:  {len(blacklist['implicit'])}")
+    printer.info("IFF System Initialized")
+    printer.indent(f"Explicitly permitted:  {len(whitelist['explicit'])}")
+    printer.indent(f"Implicitly permitted:  {len(whitelist['implicit'])}")
+    printer.indent(f"Explicitly targetted:  {len(blacklist['explicit'])}")
+    printer.indent(f"Implicitly targetted:  {len(blacklist['implicit'])}")
 
-    print(f"Preparing to eliminate incursions into the airspace of: {target_region.upper()}")
+    printer.success(f"Ready to eliminate incursions into the airspace of: {target_region.upper()}", prompt="RDY")
+    api = None # Destroy setup API client, just in case
     radar = NSAPI.Radar(user, target_region, inbound, WA_only, whitelist, blacklist, ban_bogeys, delay, jitter, version)
-    exit("Terminating") if input("Activate SAM site? (Y/n) ").lower().startswith("n") else print("SAM site initialized. Press SPACE to arm missiles.")
+
+    exit("Terminating") if printer.ask("Activate SAM site? (Y/n) ",prompt="CNF").lower().startswith("n") else printer.success("SAM site initialized. Press SPACE to arm missiles.",prompt="RDY")
 
     if session.login(ro_nation, password):
-        print("\rMissiles armed. Starting radar.")
+        printer.success("Missiles armed. Starting radar.")
 
         # Open a thread to run track_inbounds (poll API regularly for nations)
         #radar = Process(target=track_inbounds, args=(user, region, inbound, WA_only, ROs))
@@ -124,30 +135,32 @@ def main():
         radarThread = Thread(target=track_inbounds, args=(radar,inbound))
         radarThread.start()
 
-        print("\rRadar online.")
-        print("\rBIRD AFFIRM; PREPARED TO ENGAGE")
+        printer.info("Radar online.")
+        printer.success("BIRD AFFIRM; PREPARED TO ENGAGE", prompt="RDY")
         try: 
             while True:
                 if inbound:
                     # Pick a random target from the list
                     target = random.choice(inbound)
-                    print(f"\r[+] ACQUIRED MISSILE LOCK; TRACKING -[ {target.upper()} ]-")
+                    printer.missile_lock(target)
+#                    print(f"\r[+] ACQUIRED MISSILE LOCK; TRACKING -[ {target.upper()} ]-")
                     if session.banject(target):
-                        print(f"\r[+] BIRD AWAY; HIT CONFIRMED: {target.upper()}")
+                        printer.hit_confirmed(target)
+                        #print(f"\r[+] BIRD AWAY; HIT CONFIRMED: {target.upper()}")
                         if target in inbound:
                             try:
                                 inbound.remove(target)
                             except:
-                                print("\r[!] FAILED TO REMOVE BOGEY FROM TRACKING: {canonicalize(nation).upper()}")
+                                printer.warning(f"FAILED TO REMOVE BOGEY FROM TRACKING: {canonicalize(nation).upper()}")
 
                     else:
-                        print("\r[!] BIRD NEGATIVE; FAILED TO HIT: {target.upper()}; TRY AGAIN")
-        except KeyboardInterrupt:
-            print("Disarming SAM missiles at user request")
+                        printer.fail_hit(target)
 
-        print("Goodbye")
+        except KeyboardInterrupt:
+            printer.info("Disarming SAM missiles at user request")
+
     else:
-        print("Fatal error - check your credentials, ya dingus")
+        printer.error("Check your credentials, ya dingus")
 
 if __name__ == "__main__":
     main()
