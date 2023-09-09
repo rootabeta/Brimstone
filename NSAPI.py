@@ -126,6 +126,10 @@ class API():
                 officers.append(ROs.delegate)
 
         if ROs and "officers" in ROs:
+            # Edge case - no ROs
+            if not ROs.officers:
+                return []
+
             raw = ROs.officers.officer
             ROList = []
             if type(raw) != list:
