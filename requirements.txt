@@ -1,1 +1,4 @@
 nsdotpy
+pwinput
+rtoml
+colorama
