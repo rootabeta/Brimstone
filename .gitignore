@@ -165,3 +165,6 @@ include/
 lib/
 lib64
 pyvenv.cfg
+
+# Config file
+config.toml
