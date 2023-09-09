@@ -1,6 +1,6 @@
 [config]
 # Only target WA nations
-wa_only = false
+wa_only = true
 
 # Do not target ROs
 ignore_ros = true 
