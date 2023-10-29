@@ -1,11 +1,7 @@
-from colorama import Fore, Back, Style, just_fix_windows_console
+from colorama import Fore, Back, Style
 from pwinput import pwinput
 
 class PrettyPrinter():
-    # Prep to print ANSI sequences
-    def __init__(self):
-        just_fix_windows_console()
-
     # Standard stuff
     def info(self, string):
         print("\r[" + Style.BRIGHT + Fore.CYAN + "INF" + Style.RESET_ALL + "] " + str(string))

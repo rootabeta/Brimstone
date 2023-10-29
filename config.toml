@@ -6,14 +6,14 @@ wa_only = true
 ignore_ros = true 
 
 # Do not target residents
-ignore_residents = false
+ignore_residents = true
 
 # Assume unidentified, non-whitelist/blacklist nations are hostile
 # Set to false to only ban nations on the blacklist
 target_bogeys = true
 
 # Shut down Brimstone when the region updates
-stoponupdate = false 
+stoponupdate = true
 
 # How frequently to poll the API in ms
 pollspeed = 650
@@ -44,9 +44,7 @@ regions = [
 # If target_bogeys = False, ONLY ban these
 # Otherwise, this has little effect
 [blacklist]
-
 nations = [
-
 ]
 
 regions = [

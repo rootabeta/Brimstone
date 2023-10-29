@@ -15,10 +15,12 @@ nsdotpylogger.setLevel(logging.WARNING)
 printer = PrettyPrinter()
 running = True
 
+# TODO: track stoponupdate
 def track_inbounds(radar, inbound):
     global running
     while running:
         bogeys = radar.ping()
+
         inbound = bogeys
         radar.sleep() # Delay AFTER the ping, so the detections are delivered as fast as possible
 

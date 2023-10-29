@@ -89,6 +89,7 @@ class API():
         if residingregion and "region" in residingregion:
             return residingregion["region"]
 
+    # TODO: for this and getWANations, also report the region update time
     # Get list of all nations
     def getNations(self, region):
         nations = self.getRegionShard(region, "nations")
@@ -103,7 +104,7 @@ class API():
         else:
             return []
 
-# Get list of all WA nations
+    # Get list of all WA nations
     def getWANations(self, region):
         nations = self.getRegionShard(region, "wanations")
         if nations and "unnations" in nations:
@@ -161,6 +162,11 @@ class Radar():
         self.oldNations = []
         self.newNations = []
 
+        # TODO: Instantiate baseupdate and lastupdate 
+        # to detect when the region updates
+        self.baseupdate = 0
+        self.lastupdate = 0
+
         # Instantiate an API instance
         self.api = API(user, version, delay, jitter)
         self.initialize()
@@ -216,6 +222,9 @@ class Radar():
             else:
                 return 3
 
+    def updated(self):
+        return self.lastupdated == self.baseupdate
+    
     # Return a list of inbounds
     def ping(self):
         self.newNations = self.fetch_nations()
