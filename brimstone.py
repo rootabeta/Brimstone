@@ -7,6 +7,7 @@ import rtoml
 import random
 import time
 import NSAPI
+import os
 
 version = "2.0"
 
@@ -25,6 +26,10 @@ def track_inbounds(radar, inbound):
         radar.sleep() # Delay AFTER the ping, so the detections are delivered as fast as possible
 
 def main(): 
+    if os.name == "posix" and os.getuid() != 0:
+        printer.error("Brimstone must be run as root on Linux-based systems")
+        exit()
+
     with open("banner.txt","r",encoding="utf8") as f:
         print(f.read())
 
