@@ -479,7 +479,7 @@ fn main() -> Result<()> {
 
     // Start the primary control loop
     // The control loop does a few things every time it goes around.
-    let mut downed_counter = 0;
+    let mut splash_count = 0;
 
     // Bank of stuff we don't want to target
     let mut skippable = HashSet::new();
@@ -556,7 +556,7 @@ fn main() -> Result<()> {
                     BanResult::Success => {
                         hit_confirmed(&target);
                         skippable.insert(target);
-                        downed_counter += 1;
+                        splash_count += 1;
                     }
 
                     // Failed to ban the target for some reason, but the request didn't explode
@@ -591,8 +591,8 @@ fn main() -> Result<()> {
         };
     }
 
-    let targets_downed = format!("Targets downed: {downed_counter}");
-    info(&targets_downed);
+    let splashed = format!("Hostiles splashed: {splash_count}");
+    info(&splashed);
 
     // Shut down radar at the end of the program, for tidiness
     running.store(false, Ordering::SeqCst);
