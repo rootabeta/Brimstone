@@ -3,7 +3,7 @@
 wa_only = true
 
 # Do not target ROs
-ignore_ros = true 
+ignore_ros = true
 
 # Do not target residents
 ignore_residents = true
@@ -21,6 +21,9 @@ pollspeed = 650
 # How many seconds to add to the API delay (useful for multiple ROs)
 jitter = 0 
 
+# Override the region we're concerned with, or empty to use current region
+region_override = ""
+
 # Nations take priority over regions
 # Whitelist and blacklist initialized at startup and are not refreshed due to API limit
 
@@ -37,7 +40,9 @@ nations = [
 ]
 
 regions = [
-	"suspicious"
+	"suspicious",
+	"red_front",
+	"commie_flotilla"
 ]
 
 # Ban these nations, or nations in these regions, if they appear
