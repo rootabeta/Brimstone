@@ -121,7 +121,7 @@ pub enum RadarCommand {
     // Previously tracked nation outbound
     Seperate(String),
     // Shut down the SAM site
-    HoldFire(()),
+    HoldFire,
 }
 
 pub struct RadarReading {

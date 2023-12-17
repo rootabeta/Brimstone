@@ -22,7 +22,7 @@ pollspeed = 650
 jitter = 0 
 
 # Override the region we're concerned with, or empty to use current region
-region_override = ""
+region_override = "warzone_trinidad"
 
 # Nations take priority over regions
 # Whitelist and blacklist initialized at startup and are not refreshed due to API limit

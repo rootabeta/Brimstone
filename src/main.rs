@@ -1,4 +1,5 @@
 use anyhow::Error;
+use core::sync::atomic::{AtomicBool, Ordering};
 use color_eyre::eyre::Result;
 use device_query::DeviceState;
 use missilesystem::{create_session, wait_for_keypress, BanResult, ErrorState};
@@ -8,6 +9,7 @@ use rand::seq::SliceRandom;
 use rand::thread_rng;
 use std::collections::HashSet;
 use std::fs;
+use std::sync::Arc;
 use std::sync::mpsc;
 use std::thread;
 use std::time::Duration;
@@ -341,11 +343,19 @@ fn main() -> Result<()> {
     timestamp = wait_for_keypress(&device_state);
 
     let _ = match brimstone_session.arm(&html_client, &timestamp) {
-        Ok(_) => success("Missiles armed. Starting radar."),
+        Ok(_) => success("Missiles armed."),
         Err(error) => panic!("Failed to arm. Error: {error}"),
     };
 
     let (radartx, radarrx) = mpsc::channel();
+    let running = Arc::new(AtomicBool::new(true));
+    let r = running.clone();
+    let ctrlc = running.clone();
+
+    ctrlc::set_handler(move || {
+        info("Disarming missiles at user request.");
+        ctrlc.store(false, Ordering::SeqCst);
+    }).expect("Error setting Ctrl-C handler");
 
     let radar_handle = thread::spawn(move || {
         // Initialize
@@ -366,7 +376,7 @@ fn main() -> Result<()> {
         last_update = initialization.last_update;
 
         // This will run forever until radar is terminated
-        loop {
+        while r.load(Ordering::SeqCst) {
             let radar_ping;
             if wa_only {
                 radar_ping = get_wa_nations(&api_client, &current_region).expect("Radar failure");
@@ -376,7 +386,9 @@ fn main() -> Result<()> {
 
             // If we're watching for it to update, and it does, stop the presses
             if upd_killswitch && radar_ping.last_update > last_update {
-                radartx.send(RadarCommand::HoldFire(())).unwrap();
+                radartx.send(RadarCommand::HoldFire).unwrap();
+                r.store(false, Ordering::SeqCst);
+                break;
             }
 
             nations = radar_ping.nations;
@@ -451,7 +463,7 @@ fn main() -> Result<()> {
         */
     });
 
-    info("Radar online.");
+    success("Radar online.");
 
     // RNG driver
     let mut rng = thread_rng();
@@ -467,13 +479,13 @@ fn main() -> Result<()> {
 
     // Start the primary control loop
     // The control loop does a few things every time it goes around.
-    //    let mut downed_counter = 0;
+    let mut downed_counter = 0;
 
     // Bank of stuff we don't want to target
     let mut skippable = HashSet::new();
     // Bank of stuff we *do* want to target
     let mut bogeys = Vec::new();
-    'control_loop: loop {
+    'control_loop: while running.load(Ordering::SeqCst) {
         // 1) It checks if there are any new items waiting for it in the channel. If so, it steps
         //    through the various commands as they come in - this should be in order of appearance,
         //    conveniently. If, at any point, it encounters an ABORT, it will break immediately.
@@ -484,7 +496,7 @@ fn main() -> Result<()> {
                     RadarCommand::Seperate(nation) => {
                         bogeys.retain(|x| !x.eq(&nation));
                     }
-                    RadarCommand::HoldFire(_) => {
+                    RadarCommand::HoldFire => {
                         info("HOLD FIRE; TARGET HAS UPDATED");
                         break 'control_loop;
                     }
@@ -514,6 +526,9 @@ fn main() -> Result<()> {
             let target: &str = bogeys.choose(&mut rng).unwrap();
             let target = String::from(target);
 
+            // If we drew a target we need to skip, draw a new one without attempting to yeet - we
+            // know the attempt will fail, so why bother? Easier and faster than trying to prune
+            // the list.
             if skippable.contains(&target) {
                 continue;
             }
@@ -529,28 +544,11 @@ fn main() -> Result<()> {
             //    loop with an explanation.
             timestamp = wait_for_keypress(&device_state);
 
-            /*
-            // TODO: Make sure that no abort has sounded while we were waiting for the green light
-            // Rapidly make sure we haven't gotten a stop order while we were waiting for the
-            // keypress, and while we're in there, update the radar - we're parsing it anyway. Only
-            // takes a handful of milliseconds.
-            let _ = match radarrx.try_recv() {
-                Ok(radar_data) => match radar_data {
-                    RadarCommand::Inbound(nation) => {
-                        bogeys.push(nation)
-                    }
-                    RadarCommand::Seperate(nation) => {
-                        bogeys.retain(|x| !x.eq(&nation));
-                    }
-                    RadarCommand::HoldFire(_) => {
-                        info("HOLD FIRE; TARGET HAS UPDATED");
-                        break 'control_loop;
-                    }
-                },
-                Err(_) => {
-                    break;
-                }
-            };*/
+            // If the region updated *while* waiting on the keypress, now we can catch that by
+            // checking if running is still set to true - it will be falsified if we need to abort.
+            if !running.load(Ordering::SeqCst) {
+                break 'control_loop;
+            }
 
             let _ = match brimstone_session.yeet(&html_client, &target, &timestamp) {
                 Ok(banresult) => match banresult {
@@ -558,7 +556,7 @@ fn main() -> Result<()> {
                     BanResult::Success => {
                         hit_confirmed(&target);
                         skippable.insert(target);
-                        //downed_counter += 1;
+                        downed_counter += 1;
                     }
 
                     // Failed to ban the target for some reason, but the request didn't explode
@@ -593,10 +591,12 @@ fn main() -> Result<()> {
         };
     }
 
-    //    let targets_downed = format!("Targets downed: {downed_counter}");
-    //    info(&targets_downed);
+    let targets_downed = format!("Targets downed: {downed_counter}");
+    info(&targets_downed);
 
     // Shut down radar at the end of the program, for tidiness
+    running.store(false, Ordering::SeqCst);
     radar_handle.join().unwrap();
+
     Ok(())
 }
