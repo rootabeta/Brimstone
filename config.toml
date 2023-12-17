@@ -1,6 +1,6 @@
 [config]
 # Only target WA nations
-wa_only = true
+wa_only = false
 
 # Do not target ROs
 ignore_ros = true
@@ -22,7 +22,7 @@ pollspeed = 650
 jitter = 0 
 
 # Override the region we're concerned with, or empty to use current region
-region_override = "warzone_trinidad"
+region_override = ""
 
 # Nations take priority over regions
 # Whitelist and blacklist initialized at startup and are not refreshed due to API limit
