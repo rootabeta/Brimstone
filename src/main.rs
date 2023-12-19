@@ -247,8 +247,8 @@ fn main() -> Result<()> {
     };
 
     if spare_ros {
-        for nation in iff_get_officers(&api_client, &delay, &current_region)
-            .expect(format!("Failed to access RO list for {current_region}").as_str())
+        for nation in iff_get_officers(&api_client, &delay, &current_region).unwrap_or_default()
+            //.expect(format!("Failed to access RO list for {current_region}").as_str())
         {
             let nation = canonicalize(&nation.to_string());
             iff.whitelist_explicit.insert(nation);
@@ -262,7 +262,8 @@ fn main() -> Result<()> {
             &delay,
             &canonicalize(&current_region.to_string()),
         )
-        .expect(format!("Failed to access nationlist for {current_region}").as_str())
+        .unwrap_or_default()
+//        .expect(format!("Failed to access nationlist for {current_region}").as_str())
         {
             iff.whitelist_implicit.insert(canonicalize(&nation));
         }
@@ -301,7 +302,8 @@ fn main() -> Result<()> {
             let region = region.as_str().expect("Broken region name");
             info(&format!("Adding all nations in {region} to whitelist").to_string());
             for nation in iff_get_nations(&api_client, &delay, &canonicalize(&region.to_string()))
-                .expect(format!("Failed to access nationlist for {region}").as_str())
+                .unwrap_or_default()
+//                .expect(format!("Failed to access nationlist for {region}").as_str())
             {
                 iff.whitelist_implicit.insert(canonicalize(&nation));
             }
@@ -318,7 +320,8 @@ fn main() -> Result<()> {
             let region = region.as_str().expect("Broken region name");
             info(&format!("Adding all nations in {region} to blacklist").to_string());
             for nation in iff_get_nations(&api_client, &delay, &canonicalize(&region.to_string()))
-                .expect(format!("Failed to access nationlist for {region}").as_str())
+                .unwrap_or_default()
+//                .expect(format!("Failed to access nationlist for {region}").as_str())
             {
                 iff.blacklist_implicit.insert(canonicalize(&nation));
             }
