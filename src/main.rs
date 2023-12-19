@@ -197,21 +197,23 @@ fn main() -> Result<()> {
     // Create API and Website clients (one for each end of the site)
     let api_client: Agent = ureq::AgentBuilder::new()
         .user_agent(user_agent_api.as_str())
-        .timeout_read(Duration::from_secs(5))
-        .timeout_write(Duration::from_secs(5))
+        .timeout(Duration::from_secs(5))
         .build();
 
+    // If it's been 30 seconds and no response, it's probably safe to assume we're not getting one
+    // back. Relevant forum post: 
+    // https://forum.nationstates.net/viewtopic.php?p=40650385#p40650385
     let html_client: Agent = ureq::AgentBuilder::new()
         .user_agent(user_agent_html.as_str())
-        .timeout_read(Duration::from_secs(5))
-        .timeout_write(Duration::from_secs(5))
+        .timeout(Duration::from_secs(30))
         .build();
 
     let device_state = DeviceState::new();
 
-    let mut brimstone_session = create_session(&api_client, &ro_nation, &delay).expect(
-        "Failed to create Brimstone session, possibly due to a typoed RO nation name\nGot error",
-    );
+    let Ok(mut brimstone_session) = create_session(&api_client, &ro_nation, &delay) else { 
+        error("Failed to create Brimstone session, possibly due to a typoed RO nation name");
+        panic!("Failed to create Brimstone session");
+    };
 
     let current_region: &str;
     if !region_override.is_empty() {
