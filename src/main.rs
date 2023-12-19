@@ -9,6 +9,7 @@ use rand::seq::SliceRandom;
 use rand::thread_rng;
 use std::collections::HashSet;
 use std::fs;
+use std::io::{stdin, stdout, Read, Write};
 use std::sync::Arc;
 use std::sync::mpsc;
 use std::thread;
@@ -30,6 +31,14 @@ fn banner() {
 fn load_config(config_file: &str) -> Result<Table, Error> {
     let config: Table = toml::from_str(config_file)?;
     Ok(config)
+}
+
+/// Pause until enter is pressed. Used at the end of the program.
+fn wait_for_exit() {
+    let mut stdout = stdout();
+    info("Press enter to exit Brimstone");
+    stdout.flush().unwrap();
+    stdin().read(&mut [0]).unwrap();
 }
 
 fn main() -> Result<()> {
@@ -591,12 +600,15 @@ fn main() -> Result<()> {
         };
     }
 
+    info("Mission complete. Brimstone is now offline.");
     let splashed = format!("Hostiles splashed: {splash_count}");
     info(&splashed);
 
     // Shut down radar at the end of the program, for tidiness
     running.store(false, Ordering::SeqCst);
     radar_handle.join().unwrap();
+
+    wait_for_exit();
 
     Ok(())
 }
