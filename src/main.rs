@@ -386,6 +386,10 @@ fn main() -> Result<()> {
 
         // This will run forever until radar is terminated
         while r.load(Ordering::SeqCst) {
+            // This is our delay - not only after initialization, but also after each ping,
+            // successful or not
+            
+            thread::sleep(Duration::from_millis(delay));
             let radar_ping;
             if wa_only {
                 radar_ping = get_wa_nations(&api_client, &current_region).expect("Radar failure");
@@ -444,15 +448,6 @@ fn main() -> Result<()> {
             }
             // Update our nation list from a second ago with the new details for the next go-around
             old_nations = nations;
-
-            // Very last thing we do before another go-around is delay
-            // Soooo remember that comment about how the API client in this doesn't self-rate-limit
-            // and how I have to be very careful about doing it after finishing the data processing
-            // and before sending another API request?
-            thread::sleep(Duration::from_millis(delay));
-
-            // Yeah guess what I forgot to do
-            // I'm sorry [v] please don't DEAT me
         }
 
         /*
