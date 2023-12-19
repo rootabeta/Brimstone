@@ -1,6 +1,6 @@
 use anyhow::Error;
-use core::sync::atomic::{AtomicBool, Ordering};
 use color_eyre::eyre::Result;
+use core::sync::atomic::{AtomicBool, Ordering};
 use device_query::DeviceState;
 use missilesystem::{create_session, wait_for_keypress, BanResult, ErrorState};
 use prettyprinter::*;
@@ -10,8 +10,8 @@ use rand::thread_rng;
 use std::collections::HashSet;
 use std::fs;
 use std::io::{stdin, stdout, Read, Write};
-use std::sync::Arc;
 use std::sync::mpsc;
+use std::sync::Arc;
 use std::thread;
 use std::time::Duration;
 use toml::Table;
@@ -364,7 +364,8 @@ fn main() -> Result<()> {
     ctrlc::set_handler(move || {
         info("Disarming missiles at user request.");
         ctrlc.store(false, Ordering::SeqCst);
-    }).expect("Error setting Ctrl-C handler");
+    })
+    .expect("Error setting Ctrl-C handler");
 
     let radar_handle = thread::spawn(move || {
         // Initialize
@@ -388,7 +389,7 @@ fn main() -> Result<()> {
         while r.load(Ordering::SeqCst) {
             // This is our delay - not only after initialization, but also after each ping,
             // successful or not
-            
+
             thread::sleep(Duration::from_millis(delay));
             let radar_ping;
             if wa_only {
@@ -396,9 +397,9 @@ fn main() -> Result<()> {
             } else {
                 radar_ping = get_nations(&api_client, &current_region);
             }
-            
+
             // If the radar fails, alert the user and attempt to continue
-            if radar_ping.is_err() { 
+            if radar_ping.is_err() {
                 warning("RADAR FAILURE; DATA MAY BE STALE");
                 continue;
             }
