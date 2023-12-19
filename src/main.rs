@@ -392,10 +392,19 @@ fn main() -> Result<()> {
             thread::sleep(Duration::from_millis(delay));
             let radar_ping;
             if wa_only {
-                radar_ping = get_wa_nations(&api_client, &current_region).expect("Radar failure");
+                radar_ping = get_wa_nations(&api_client, &current_region);
             } else {
-                radar_ping = get_nations(&api_client, &current_region).expect("Radar failure");
+                radar_ping = get_nations(&api_client, &current_region);
             }
+            
+            // If the radar fails, alert the user and attempt to continue
+            if radar_ping.is_err() { 
+                warning("RADAR FAILURE; DATA MAY BE STALE");
+                continue;
+            }
+
+            // Unwrap the radar ping now that we know we have a response
+            let radar_ping = radar_ping.unwrap();
 
             // If we're watching for it to update, and it does, stop the presses
             if upd_killswitch && radar_ping.last_update > last_update {
