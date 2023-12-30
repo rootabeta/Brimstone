@@ -337,12 +337,22 @@ fn main() -> Result<()> {
     ready(
         &format!("Ready to eliminate incursions into the airspace of {current_region}").to_string(),
     );
+    /*
     let mut activation_confirm = ask("Activate SAM site? (Y/n)");
     activation_confirm.make_ascii_lowercase();
     if !activation_confirm.is_empty() && activation_confirm.starts_with("n") {
         info("Aborting SAM site startup at user request");
         return Ok(());
     }
+    */
+
+    // Final confirmation - is the user ready to go?
+    if !yes_no("Activate SAM site?") { 
+        info("Aborting SAM site startup at user request");
+        return Ok(());
+    }
+
+    info("Activating SAM site");
 
     let current_region = String::from(current_region);
 

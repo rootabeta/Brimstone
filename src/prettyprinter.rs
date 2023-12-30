@@ -1,5 +1,5 @@
 use colored::Colorize;
-use inquire::{Password, PasswordDisplayMode, Text};
+use inquire::{Password, PasswordDisplayMode, Select, Text};
 
 /// Used for general status updates
 pub fn info(string: &str) {
@@ -124,4 +124,15 @@ pub fn password(string: &str) -> String {
         .with_formatter(&|s| "*".repeat(s.len()))
         .prompt();
     return response.unwrap();
+}
+
+/// Ask the user to answer a yes or no question
+pub fn yes_no(string: &str) -> bool { 
+    let options: Vec<&str> = vec!["Yes", "No"];
+    let response = Select::new(string, options).prompt().unwrap();
+    if response == "Yes" { 
+        true
+    } else { 
+        false
+    }
 }
