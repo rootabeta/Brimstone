@@ -13,7 +13,7 @@ ignore_residents = true
 target_bogeys = true
 
 # Shut down Brimstone when the region updates
-stoponupdate = true
+stoponupdate = false
 
 # How frequently to poll the API in ms
 pollspeed = 650
