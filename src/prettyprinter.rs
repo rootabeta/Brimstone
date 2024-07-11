@@ -129,8 +129,12 @@ pub fn password(string: &str) -> String {
 /// Ask the user to answer a yes or no question
 pub fn yes_no(string: &str) -> bool { 
     let options: Vec<&str> = vec!["Yes", "No"];
-    let response = Select::new(string, options).prompt().unwrap();
-    if response == "Yes" { 
+    let response = Select::new(string, options)
+        .without_filtering()
+        .prompt()
+        .unwrap();
+
+    if response == "Yes" {
         true
     } else { 
         false

@@ -347,7 +347,7 @@ fn main() -> Result<()> {
     */
 
     // Final confirmation - is the user ready to go?
-    if !yes_no("Activate SAM site?") { 
+    if !yes_no("Activate SAM site?\n") { 
         info("Aborting SAM site startup at user request");
         return Ok(());
     }
