@@ -183,7 +183,7 @@ impl Session {
         if *userclick == 0 {
             panic!("Bogus userclick detected! Aborting execution! Please stop using this program and file a bug report!");
         }
-        let url = format!("https://www.nationstates.net/page=region_control/region={}/template-overall=none/userclick={}", 
+        let url = format!("https://www.nationstates.net/page=region_control/region={}?template-overall=none&userclick={}", 
                           self.region,
                           userclick
                   );
@@ -250,7 +250,7 @@ impl Session {
             panic!("Bogus userclick detected! Aborting execution! Please stop using this program and file a bug report!");
         }
 
-        let url = format!("https://www.nationstates.net/page=region_control/region={}/template-overall=none/userclick={}", 
+        let url = format!("https://www.nationstates.net/page=region_control/region={}?template-overall=none&userclick={}", 
                 &self.region,
                 userclick
               );
@@ -284,6 +284,7 @@ impl Session {
         } else {
             if let Some(error_message) = document.find(Class("error")).next() {
                 let error_message = error_message.text();
+                println!("DEBUG: {error_message}");
                 // 1s cooldown not yet expired
                 if error_message.contains("heavy nation-shifting assets are currently deployed") {
                     Ok(BanResult::Failure(BanFailure::TooFast))
