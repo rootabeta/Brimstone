@@ -213,10 +213,9 @@ impl Session {
 
         let document = Document::from(response.as_str());
         for node in document.find(Attr("name", "chk")) {
-            self.chk = node
-                .attr("value")
-                .expect("Couldn't extract chk")
-                .to_string();
+            if let Some(chk) = node.attr("value") { 
+                self.chk = chk.to_string();
+            }
             break;
         }
 
@@ -268,10 +267,9 @@ impl Session {
 
         let document = Document::from(response.as_str());
         for node in document.find(Attr("name", "chk")) {
-            self.chk = node
-                .attr("value")
-                .expect("Couldn't extract chk")
-                .to_string();
+            if let Some(chk) = node.attr("value") { 
+                self.chk = chk.to_string();
+            }
             break;
         }
 
