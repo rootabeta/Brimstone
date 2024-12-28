@@ -18,9 +18,6 @@ stoponupdate = false
 # How frequently to poll the API in ms
 pollspeed = 650
 
-# How many seconds to add to the API delay (useful for multiple ROs)
-jitter = 0 
-
 # Override the region we're concerned with, or empty to use current region
 region_override = ""
 

@@ -128,14 +128,6 @@ fn main() -> Result<()> {
         }
     };
 
-    let jitter: i64 = match main_config.get("jitter") {
-        Some(integer) => integer.as_integer().unwrap_or(0),
-        None => {
-            warning("Could not find setting \"jitter\" in config file! Assuming 0ms, but in the future, check that your config is valid.");
-            0
-        }
-    };
-
     let region_override: &str = match main_config.get("region_override") {
         Some(option) => option.as_str().unwrap_or(""),
         None => {
@@ -174,7 +166,6 @@ fn main() -> Result<()> {
     println!();
     indent(format!("Delay interval:     {delay}ms").as_str());
 
-    indent(format!("Jitter:             {jitter:0>3}ms").as_str());
     if !region_override.is_empty() {
         println!();
         warning("REGION OVERRIDE ENABLED");
