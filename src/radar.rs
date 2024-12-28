@@ -38,7 +38,7 @@ impl APIResponse {
         // Solve edge-case where ONE nation is in, but since it's not delimited with , or :, it is
         // treated as non-existent. Instead, if no delimiters but there IS text, assume it's all
         // one nation name and bubble it up as the sole element.
-        } else if !self.nations.is_empty() { 
+        } else if !self.nations.is_empty() {
             nations.push(canonicalize(&self.nations));
         }
         nations

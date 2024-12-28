@@ -46,10 +46,13 @@ fn check_for_updates() {
     let informer = update_informer::new(
         update_informer::registry::GitHub,
         "brimstone",
-        env!("CARGO_PKG_VERSION"));
+        env!("CARGO_PKG_VERSION"),
+    );
 
-    if let Some(version) = informer.check_version().ok().flatten() { 
-        warning(&format!("A new version of Brimstone is available: {version}."));
+    if let Some(version) = informer.check_version().ok().flatten() {
+        warning(&format!(
+            "A new version of Brimstone is available: {version}."
+        ));
         indent("Please update to the latest version to stay ahead of bug fixes and rule changes.");
     }
 }
@@ -208,7 +211,7 @@ fn main() -> Result<()> {
         .build();
 
     // If it's been 30 seconds and no response, it's probably safe to assume we're not getting one
-    // back. Relevant forum post: 
+    // back. Relevant forum post:
     // https://forum.nationstates.net/viewtopic.php?p=40650385#p40650385
     let html_client: Agent = ureq::AgentBuilder::new()
         .user_agent(user_agent_html.as_str())
@@ -217,7 +220,7 @@ fn main() -> Result<()> {
 
     let device_state = DeviceState::new();
 
-    let Ok(mut brimstone_session) = create_session(&api_client, &ro_nation, &delay) else { 
+    let Ok(mut brimstone_session) = create_session(&api_client, &ro_nation, &delay) else {
         error("Failed to create Brimstone session, possibly due to a typoed RO nation name");
         panic!("Failed to create Brimstone session");
     };
@@ -255,7 +258,7 @@ fn main() -> Result<()> {
 
     if spare_ros {
         for nation in iff_get_officers(&api_client, &delay, &current_region).unwrap_or_default()
-            //.expect(format!("Failed to access RO list for {current_region}").as_str())
+        //.expect(format!("Failed to access RO list for {current_region}").as_str())
         {
             let nation = canonicalize(&nation.to_string());
             iff.whitelist_explicit.insert(nation);
@@ -270,7 +273,7 @@ fn main() -> Result<()> {
             &canonicalize(&current_region.to_string()),
         )
         .unwrap_or_default()
-//        .expect(format!("Failed to access nationlist for {current_region}").as_str())
+        //        .expect(format!("Failed to access nationlist for {current_region}").as_str())
         {
             iff.whitelist_implicit.insert(canonicalize(&nation));
         }
@@ -310,7 +313,7 @@ fn main() -> Result<()> {
             info(&format!("Adding all nations in {region} to whitelist").to_string());
             for nation in iff_get_nations(&api_client, &delay, &canonicalize(&region.to_string()))
                 .unwrap_or_default()
-//                .expect(format!("Failed to access nationlist for {region}").as_str())
+            //                .expect(format!("Failed to access nationlist for {region}").as_str())
             {
                 iff.whitelist_implicit.insert(canonicalize(&nation));
             }
@@ -328,7 +331,7 @@ fn main() -> Result<()> {
             info(&format!("Adding all nations in {region} to blacklist").to_string());
             for nation in iff_get_nations(&api_client, &delay, &canonicalize(&region.to_string()))
                 .unwrap_or_default()
-//                .expect(format!("Failed to access nationlist for {region}").as_str())
+            //                .expect(format!("Failed to access nationlist for {region}").as_str())
             {
                 iff.blacklist_implicit.insert(canonicalize(&nation));
             }
@@ -341,12 +344,13 @@ fn main() -> Result<()> {
     indent(&format!("Explicitly targetted:  {}", iff.blacklist_explicit.len()).to_string());
     indent(&format!("Implicitly targetted:  {}", iff.blacklist_implicit.len()).to_string());
 
+    println!();
     ready(
         &format!("Ready to eliminate incursions into the airspace of {current_region}").to_string(),
     );
 
     // Final confirmation - is the user ready to go?
-    if !yes_no("Activate SAM site?\n") { 
+    if !yes_no("Activate SAM site?\n") {
         info("Aborting SAM site startup at user request");
         return Ok(());
     }
