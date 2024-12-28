@@ -1,6 +1,6 @@
 [package]
 name = "brimstone"
-version = "3.0.8"
+version = "3.0.9"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
@@ -18,3 +18,4 @@ rand = "0.8.5"
 select = "0.6.0"
 ctrlc = "3.4.1"
 inquire = "0.7.5"
+update-informer = { version = "1.2.0", features = ["github"] }

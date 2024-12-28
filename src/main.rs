@@ -15,6 +15,7 @@ use std::sync::Arc;
 use std::thread;
 use std::time::Duration;
 use toml::Table;
+use update_informer::Check;
 use ureq::Agent;
 
 mod missilesystem;
@@ -41,10 +42,24 @@ fn wait_for_exit() {
     stdin().read(&mut [0]).unwrap();
 }
 
+fn check_for_updates() {
+    let informer = update_informer::new(
+        update_informer::registry::GitHub,
+        "brimstone",
+        env!("CARGO_PKG_VERSION"));
+
+    if let Some(version) = informer.check_version().ok().flatten() { 
+        warning(&format!("A new version of Brimstone is available: {version}."));
+        indent("Please update to the latest version to stay ahead of bug fixes and rule changes.");
+    }
+}
+
 fn main() -> Result<()> {
     // Startup
     color_eyre::install()?;
     banner();
+
+    check_for_updates();
 
     // Load settings from config file
     let config_file = match fs::read_to_string("config.toml") {
@@ -155,6 +170,7 @@ fn main() -> Result<()> {
     // Print out current settings
     println!();
     info("SETTINGS:");
+    indent(format!("Brimstone Release:  {}", env!("CARGO_PKG_VERSION")).as_str());
     indent(format!("Main Nation:        {user}").as_str());
     indent(format!("RO Nation:          {ro_nation}").as_str());
     println!();
@@ -328,14 +344,6 @@ fn main() -> Result<()> {
     ready(
         &format!("Ready to eliminate incursions into the airspace of {current_region}").to_string(),
     );
-    /*
-    let mut activation_confirm = ask("Activate SAM site? (Y/n)");
-    activation_confirm.make_ascii_lowercase();
-    if !activation_confirm.is_empty() && activation_confirm.starts_with("n") {
-        info("Aborting SAM site startup at user request");
-        return Ok(());
-    }
-    */
 
     // Final confirmation - is the user ready to go?
     if !yes_no("Activate SAM site?\n") { 
