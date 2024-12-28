@@ -57,12 +57,25 @@ fn check_for_updates() {
     }
 }
 
+fn check_not_wayland() { 
+    if let Ok(value) = std::env::var("WAYLAND_DISPLAY") { 
+        if !value.is_empty() { 
+            panic!("Brimstone does not work in Wayland environments. Please run under X11.");
+        }
+    }
+}
+
 fn main() -> Result<()> {
     // Startup
     color_eyre::install()?;
     banner();
 
     check_for_updates();
+
+    // If compiled for Linux, check to prevent use of Wayland
+    if cfg!(target_os = "linux") {
+        check_not_wayland();
+    }
 
     // Load settings from config file
     let config_file = match fs::read_to_string("config.toml") {
