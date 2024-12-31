@@ -42,6 +42,13 @@ fn wait_for_exit() {
     stdin().read(&mut [0]).unwrap();
 }
 
+fn fatal_error(reason: &String) -> ! {
+    error(reason);
+    indent("Brimstone cannot recover from this error and must be restarted.");
+    wait_for_exit();
+    panic!("Caught fatal error: {reason}");
+}
+
 fn check_for_updates() {
     let informer = update_informer::new(
         update_informer::registry::GitHub,
@@ -67,17 +74,17 @@ fn main() -> Result<()> {
     // Load settings from config file
     let config_file = match fs::read_to_string("config.toml") {
         Ok(config_data) => config_data,
-        Err(e) => panic!("Could not open config.toml!\n{e}"),
+        Err(e) => fatal_error(&format!("Could not open config.toml!\n{e}")),
     };
 
     let config = match load_config(config_file.as_str()) {
         Ok(configuration) => configuration,
-        Err(error) => panic!("Failed to interpret config.toml!\n{error}"),
+        Err(error) => fatal_error(&format!("Failed to interpret config.toml!\n{error}")),
     };
 
     // If loading a field fails, use a default value that's sensible for most anti-liberation work
     let Some(main_config) = config.get("config") else {
-        panic!("Expected [config] block in config file!");
+        fatal_error(&"Expected [config] block in config file!".to_string());
     };
 
     // Load WA-only setting, defaulting to True if corrupted or not found
@@ -164,7 +171,7 @@ fn main() -> Result<()> {
     if user.is_empty() {
         // Suffer the Pharaoh's curse (curse approved by the actual Pharaoh of Osiris)
         error("Main nation is a required parameter!");
-        panic!("Suffer the Pharaoh's Curse");
+        fatal_error(&"Suffer the Pharaoh's Curse".to_string());
     }
 
     let ro_nation = canonicalize(&ask("RO nation:"));
@@ -222,7 +229,7 @@ fn main() -> Result<()> {
 
     let Ok(mut brimstone_session) = create_session(&api_client, &ro_nation, &delay) else {
         error("Failed to create Brimstone session, possibly due to a typoed RO nation name");
-        panic!("Failed to create Brimstone session");
+        fatal_error(&"Failed to create Brimstone session".to_string());
     };
 
     let current_region: &str;
@@ -249,11 +256,11 @@ fn main() -> Result<()> {
     };
 
     let Some(whitelist_config) = config.get("whitelist") else {
-        panic!("Expected [whitelist] block in config file!");
+        fatal_error(&"Expected [whitelist] block in config file!".to_string());
     };
 
     let Some(blacklist_config) = config.get("blacklist") else {
-        panic!("Expected [blacklist] block in config file!");
+        fatal_error(&"Expected [blacklist] block in config file!".to_string());
     };
 
     if spare_ros {
@@ -361,7 +368,7 @@ fn main() -> Result<()> {
 
     let _ = match brimstone_session.login(&api_client, &ro_nation, &password, &delay) {
         Ok(_) => ready("SAM site initialized. Press SPACE to arm missiles."),
-        Err(error) => panic!("Failed to log in to RO nation. Error: {error}"),
+        Err(error) => fatal_error(&format!("Failed to log in to RO nation. Error: {error}")),
     };
 
     // This is where the fun begins
@@ -371,7 +378,7 @@ fn main() -> Result<()> {
 
     let _ = match brimstone_session.arm(&html_client, &timestamp) {
         Ok(_) => success("Missiles armed."),
-        Err(error) => panic!("Failed to arm. Error: {error}"),
+        Err(error) => fatal_error(&format!("Failed to arm. Error: {error}")),
     };
 
     let (radartx, radarrx) = mpsc::channel();
